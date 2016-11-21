@@ -65,13 +65,14 @@
   <span class="pl-s"><span class="pl-pds">"</span>ownerid<span class="pl-pds">"</span></span> <span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>your-user-id<span class="pl-pds">"</span></span>,
   <span class="pl-s"><span class="pl-pds">"</span>clientID<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>the-invite-app-id<span class="pl-pds">"</span></span>,
   <span class="pl-s"><span class="pl-pds">"</span>prefix<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>+<span class="pl-pds">"</span></span>,
-  <span class="pl-s"><span class="pl-pds">"</span>functions<span class="pl-pds">"</span></span><span class="pl-k">:</span> [],
-  <span class="pl-s"><span class="pl-pds">"</span>commandInhibitors<span class="pl-pds">"</span></span><span class="pl-k">:</span> [<span class="pl-s"><span class="pl-pds">"</span>disable<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>permissions<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>missingBotPermissions<span class="pl-pds">"</span></span>],
-  <span class="pl-s"><span class="pl-pds">"</span>dataHandlers<span class="pl-pds">"</span></span><span class="pl-k">:</span> [],
   <span class="pl-s"><span class="pl-pds">"</span>clientOptions<span class="pl-pds">"</span></span><span class="pl-k">:</span> {
     <span class="pl-s"><span class="pl-pds">"</span>fetchAllMembers<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-c1">true</span>
   }
 });</pre></div>
+
+<blockquote>
+<p>For all you selfbot users out there, you can add a option ('selfbot': true) to have Komada enabled for selfbot usage. i.e. only respond to commands from you.</p>
+</blockquote>
 
 <p>Then, run the following in your folder:</p>
 
@@ -80,7 +81,7 @@ node app.js
 </code></pre>
 
 <blockquote>
-<p>Requires Node 6 or higher (because discord.js requires that), also requires Discord.js v10 (currently #indev), installed automatically with <code>npm install</code>.</p>
+<p>Requires Node 6 or higher (because Discord.js requires that), also requires Discord.js v10, installed automatically with <code>npm install</code>.</p>
 </blockquote>
 
 <h2>
@@ -90,18 +91,23 @@ node app.js
 <p>For creating your own pieces</p>
 </blockquote>
 
-<p>Essentially, the way Komada works is that we have <em>core</em> pieces (functions, events, commands, etc) loaded automatically. 
-But you can add your own pieces easily by adding files to your <em>local</em> folders (which are created on first load)</p>
+<p>Essentially, the way Komada works is that we have <em>core</em> pieces (functions, events, commands, etc.) loaded automatically.
+But you can add your own pieces easily by adding files to your <em>local</em> folders (which are created on first load).</p>
 
-<p>These pieces are: </p>
+<p>These pieces are:</p>
 
 <ul>
 <li>
-<strong>Commands</strong> which add in-chat functionality to your bot</li>
+<strong>commands</strong> which add in-chat functionality to your bot.</li>
 <li>
 <strong>functions</strong> which can be used by other pieces or anywhere in the bot.</li>
 <li>
-<strong>dataHandlers</strong> which are database connectors (in progress at the moment)</li>
+<strong>inhibitors</strong> which are used to check if a command should be run or not.</li>
+<li>
+<strong>monitors</strong> which are used to check a message before it's a command.</li>
+<li><strong>events</strong></li>
+<li>
+<strong>dataProviders</strong> which are database connectors (in progress at the moment).</li>
 </ul>
 
 <h3>
@@ -113,12 +119,12 @@ will create a command named <code>test</code> in the <code>Misc</code> category.
 also be created by adding a second folder level.</p>
 
 <blockquote>
-<p>If a command is present both in the <em>core</em> folders and your client folders, 
+<p>If a command is present both in the <em>core</em> folders and your client folders,
 your command will override the core one. This can let you modify the core
-behaviour. Note also that you cannot have more than one command with the same name.</p>
+behavior. Note also that you cannot have more than one command with the same name.</p>
 </blockquote>
 
-<div class="highlight highlight-source-js"><pre><span class="pl-c1">exports</span>.<span class="pl-en">run</span> <span class="pl-k">=</span> (<span class="pl-smi">client</span>, <span class="pl-smi">msg</span>. [<span class="pl-k">...</span><span class="pl-v">args</span>]) <span class="pl-k">=&gt;</span> {
+<div class="highlight highlight-source-js"><pre><span class="pl-c1">exports</span>.<span class="pl-en">run</span> <span class="pl-k">=</span> (<span class="pl-smi">client</span>, <span class="pl-smi">msg</span>, [<span class="pl-k">...</span><span class="pl-v">args</span>]) <span class="pl-k">=&gt;</span> {
   <span class="pl-c">// Place Code Here</span>
 };
 
@@ -138,26 +144,30 @@ behaviour. Note also that you cannot have more than one command with the same na
   usageDelim<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>
 };</pre></div>
 
+<blockquote>
+<p>Tip: If you need something created before the command is ever ran, you can specify
+exports.init = (client) =&gt; {...} to make Komada run that portion of code beforehand.</p>
+</blockquote>
+
 <p><code>[...args]</code> represents a variable number of arguments give when the command is
 run. The name of the arguments in the array (and their count) is determined
 by the <code>usage</code> property and its given arguments.</p>
 
-<p><strong>Non-obvious options</strong>: </p>
+<p><strong>Non-obvious options</strong>:</p>
 
 <ul>
 <li>
-<strong>enabled</strong>: Set to false to completely disable this command, it cannot be forecefully enabled.</li>
+<strong>enabled</strong>: Set to false to completely disable this command, it cannot be forcefully enabled.</li>
 <li>
 <strong>aliases</strong>: Array of aliases for the command, which will <em>also</em> trigger it.</li>
 <li>
-<strong>permLevel</strong>: Permission level, controlled via <code>./functions/permissionLevel.js</code>
-</li>
+<strong>permLevel</strong>: Permission level, controlled via <code>./functions/permissionLevel.js</code>.</li>
 <li>
 <strong>botPerms</strong>: An array of permission strings (such as <code>"MANAGE_MESSAGES"</code>) required for the command to run.</li>
 <li>
-<strong>requiredFuncs</strong>: An array of function names required for this command to execute (dependency)</li>
+<strong>requiredFuncs</strong>: An array of function names required for this command to execute (dependency).</li>
 <li>
-<strong>usage</strong>: The usage string as determined by the Argument Usage (see below)</li>
+<strong>usage</strong>: The usage string as determined by the Argument Usage (see below).</li>
 </ul>
 
 <h4>
@@ -170,13 +180,13 @@ by the <code>usage</code> property and its given arguments.</p>
 
 <ul>
 <li>
-<strong>Name</strong> Mostly used for debugging message, unless the type is Litteral in which it compares the argument to the name.</li>
+<strong>Name</strong> Mostly used for debugging message, unless the type is Literal in which it compares the argument to the name.</li>
 <li>
-<strong>Type</strong> The type of variable you are expecting</li>
+<strong>Type</strong> The type of variable you are expecting.</li>
 <li>
 <strong>Min, Max</strong> Minimum or Maximum for a giving variable (works on strings in terms of length, and on all types of numbers in terms of value) You are allowed to define any combination of min and max. Omit for none, <code>{min}</code> for min, <code>{,max}</code> for max.</li>
 <li>
-<strong>Special Repeat Tag</strong> <code>[...]</code> will repeat the last usage optionally until you run out of arguments. Useful for doing something like <code>&lt;SearchTerm:str&gt; [...]</code> which will allow you to take as many search terms as you want, per your Usage Deliminator.</li>
+<strong>Special Repeat Tag</strong> <code>[...]</code> will repeat the last usage optionally until you run out of arguments. Useful for doing something like <code>&lt;SearchTerm:str&gt; [...]</code> which will allow you to take as many search terms as you want, per your Usage Delimiter.</li>
 </ul>
 
 <p><strong>Usage Types</strong></p>
@@ -185,21 +195,25 @@ by the <code>usage</code> property and its given arguments.</p>
 <li>
 <code>literal</code> : Literally equal to the Name. This is the default type if none is defined.</li>
 <li>
-<code>str</code>, <code>string</code> : Strings</li>
+<code>str</code>, <code>string</code> : Strings.</li>
 <li>
-<code>int</code>, <code>integer</code> : Integers</li>
+<code>int</code>, <code>integer</code> : Integers.</li>
 <li>
-<code>num</code>, <code>number</code>, <code>Float</code> : Floating point numbers</li>
+<code>num</code>, <code>number</code>, <code>Float</code> : Floating point numbers.</li>
 <li>
-<code>url</code> : a url</li>
+<code>boolean</code>, : A true or false statement.</li>
 <li>
-<code>msg</code>, <code>message</code> : A message object returned from the message id (now using fetchMessage as of d3d498c99d5eca98b5cbcefb9838fa7d96f17c93)</li>
+<code>url</code> : A URL.</li>
 <li>
-<code>channel</code> : A channel object returned from the channel id or channel tag</li>
+<code>msg</code>, <code>message</code> : A message object returned from the message ID (now using fetchMessage as of d3d498c99d5eca98b5cbcefb9838fa7d96f17c93).</li>
 <li>
-<code>guild</code> : A guild object returned from the guild id</li>
+<code>role</code> : A role object returned from the role ID or mention.</li>
 <li>
-<code>user</code>, <code>mention</code> : A user object returned from the user id or mention</li>
+<code>channel</code> : A channel object returned from the channel ID or channel tag.</li>
+<li>
+<code>guild</code> : A guild object returned from the guild ID.</li>
+<li>
+<code>user</code>, <code>mention</code> : A user object returned from the user ID or mention.</li>
 </ul>
 
 <h3>
@@ -215,8 +229,8 @@ loaded and will run when that event is triggered.</p>
   <span class="pl-c">// event contents</span>
 };</pre></div>
 
-<p>Where <code>[...args]</code> is arguments you would <em>normally</em> get from those events.
-For example, while the <code>ready</code> event would only have <code>(client)</code>, the 
+<p>Where <code>[...args]</code> are arguments you would <em>normally</em> get from those events.
+For example, while the <code>ready</code> event would only have <code>(client)</code>, the
 <code>guildMemberAdd</code> event would be <code>(guild, member)</code>.</p>
 
 <h3>
@@ -239,6 +253,51 @@ not supposed to, but let's keep it between you and me, alright?</p>
 
 <p>The arguments are arbitrary - just like a regular function. It may, or may not,
 return anything. Basically any functions. You know what I mean.</p>
+
+<h3>
+<a id="creating-a-inhibitors" class="anchor" href="#creating-a-inhibitors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating a inhibitors</h3>
+
+<p>Inhibitors are only ran on commands. They are used to check a variety of conditions
+before a command is ever ran, such as checking if a user has the right amount of permissions
+to use a command. Inhibitors are loaded as core first, and if your code contains a inhibitor
+of the same name it overrides the core inhibitor.</p>
+
+<p>Their structure is restricted, meaning to work they must be defined exactly like this.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c1">exports</span>.<span class="pl-smi">conf</span> <span class="pl-k">=</span> {
+  enabled<span class="pl-k">:</span> <span class="pl-c1">true</span>,
+  spamProtection<span class="pl-k">:</span> <span class="pl-c1">false</span>,
+};
+
+<span class="pl-c1">exports</span>.<span class="pl-en">run</span> <span class="pl-k">=</span> (<span class="pl-smi">client</span>, <span class="pl-smi">msg</span>, <span class="pl-smi">cmd</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-c">// code here</span>
+}</pre></div>
+
+<blockquote>
+<p>Note: The order does not matter.</p>
+</blockquote>
+
+<h3>
+<a id="creating-a-monitors" class="anchor" href="#creating-a-monitors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating a monitors</h3>
+
+<p>Monitors are special in that they will always run on any message. This is particularly
+useful when you need to do checking on the message, such as checking if a message
+contains a vulgar word (profanity filter). They are almost completely identical to
+inhibitors, the only difference between one is ran on the message, and the other
+is ran on the command. Monitors are loaded as core first, and if your code contains
+a monitor of the same name it overrides the core monitor.</p>
+
+<p>Their structure is identical to inhibitors, being the only difference is that you
+don't pass a command parameter to them.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c1">exports</span>.<span class="pl-smi">conf</span> <span class="pl-k">=</span> {
+  enabled<span class="pl-k">:</span> <span class="pl-c1">true</span>,
+  spamProtection<span class="pl-k">:</span> <span class="pl-c1">false</span>,
+};
+
+<span class="pl-c1">exports</span>.<span class="pl-en">run</span> <span class="pl-k">=</span> (<span class="pl-smi">client</span>, <span class="pl-smi">msg</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-c">// code here</span>
+};</pre></div>
       </section>
     </div>
 
